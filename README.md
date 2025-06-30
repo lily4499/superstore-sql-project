@@ -36,15 +36,27 @@ pip install kaggle
 mkdir data && cd data
 kaggle datasets download ...
 unzip ...
+mv 'Sample - Superstore.csv' superstore_orders.csv
 ```
 
-Clean Data
+## Clean Data
+To fix the data before loading using LOAD DATA INFILE, we need to address common formatting issues like:  
+Excel-style dates (MM/DD/YYYY)  
+Commas in text fields (especially in Product Name)  
+Special characters or quotes  
+Ensuring correct column count  
+We'll handle this by preprocessing the CSV in the CLI or Python before loading it into MySQL.  
+
 Save this script as clean_csv.py in your project root:
 ```
 import pandas as pd
 
 # Load original CSV
-df = pd.read_csv('data/superstore_orders.csv')
+# Try encoding='latin1' or 'windows-1252' if 'utf-8' fails
+df = pd.read_csv('data/superstore_orders.csv', encoding='latin1')
+
+# Example data check
+print(df.head())
 
 # ✅ 1. Fix date format (MM/DD/YYYY → YYYY-MM-DD)
 df['Order Date'] = pd.to_datetime(df['Order Date'], format='%m/%d/%Y')
@@ -178,6 +190,7 @@ ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS;
 ```
+![image](https://github.com/user-attachments/assets/b1f84e1d-3e7d-417a-aa85-ac7435a218f2)
 
 ---
 
@@ -188,6 +201,7 @@ IGNORE 1 ROWS;
 ```sql
 SELECT SUM(Sales) AS Total_Sales, SUM(Profit) AS Total_Profit FROM orders;
 ```
+![image](https://github.com/user-attachments/assets/9752e144-08ba-4528-87b4-fcdb38081adc)
 
 ### 🔹 Top 5 Most Profitable Products
 
@@ -198,6 +212,7 @@ GROUP BY Product_Name
 ORDER BY Profit DESC
 LIMIT 5;
 ```
+![image](https://github.com/user-attachments/assets/d0a3b841-248c-46f9-a73e-d17b505fef49)
 
 ### 🔹 Monthly Sales Trend
 
@@ -207,6 +222,7 @@ FROM orders
 GROUP BY Month
 ORDER BY Month;
 ```
+![image](https://github.com/user-attachments/assets/9d94f934-7891-4e53-9f17-167d0dbcfaba)
 
 ### 🔹 Segment-wise Revenue
 
@@ -216,6 +232,7 @@ FROM orders
 GROUP BY Segment
 ORDER BY Revenue DESC;
 ```
+![image](https://github.com/user-attachments/assets/23ef838e-4145-4060-9e56-a65305fe1f89)
 
 ### 🔹 Discount Impact on Profit
 
@@ -225,6 +242,7 @@ FROM orders
 GROUP BY Discount
 ORDER BY Discount;
 ```
+![image](https://github.com/user-attachments/assets/e863d56e-dd96-4ac4-994e-4022afd71ce6)
 
 ---
 
